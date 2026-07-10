@@ -5,7 +5,7 @@
 **🔗 線上 Demo:https://order-agent-56007855094.asia-east1.run.app**
 (部署於 GCP Cloud Run 台灣機房;閒置會縮到零實例,第一次開啟請等待數秒冷啟動)
 
-![screenshot](docs/screenshot.png)
+![screenshot](docs/screenshot.jpg)
 
 ## 可以問它什麼
 
@@ -42,25 +42,25 @@ flowchart LR
 
 後端不直接暴露 ADK 的內部事件格式,而是在服務層收斂成六種語意明確的事件(防腐層):
 
-| type | 語意 | 前端行為 |
-|------|------|---------|
-| `delta` | 逐字文字片段 | 追加(打字機效果) |
-| `text` | 段落完整彙總 | 覆蓋(避免 partial 重複) |
-| `tool_call` | Agent 呼叫工具 | 側欄新增步驟(含參數) |
-| `tool_result` | 工具執行結果 | 側欄顯示摘要(如「取得 12 筆」) |
-| `done` | 本輪結束 | 收尾 |
-| `error` | 錯誤 | 錯誤狀態 UI(不會無聲斷線) |
+| type          | 語意           | 前端行為                       |
+| ------------- | -------------- | ------------------------------ |
+| `delta`       | 逐字文字片段   | 追加(打字機效果)               |
+| `text`        | 段落完整彙總   | 覆蓋(避免 partial 重複)        |
+| `tool_call`   | Agent 呼叫工具 | 側欄新增步驟(含參數)           |
+| `tool_result` | 工具執行結果   | 側欄顯示摘要(如「取得 12 筆」) |
+| `done`        | 本輪結束       | 收尾                           |
+| `error`       | 錯誤           | 錯誤狀態 UI(不會無聲斷線)      |
 
 ## 技術選型與理由
 
-| 決策 | 理由 |
-|------|------|
-| **Google ADK** | Agent 推理迴圈、function calling、Session 管理開箱即用;`adk web` 開發介面適合驗證 Agent 行為;部署路徑直通 Cloud Run / Vertex AI |
-| **SSE 而非 WebSocket** | LLM 聊天是「一次 POST、單向逐字回」——單向就夠。SSE 走標準 HTTP、基建友善;WebSocket 留給真正雙向的場景(如語音) |
-| **自訂 /chat 端點而非 ADK 內建 api_server** | 內建端點格式是框架內部視角,欄位龐雜且隨版本變動;服務層翻譯成自己的協定,前後端契約由自己控制 |
-| **工具用 in-process function 而非 MCP** | 工具只有單一消費者(本 Agent),MCP 是多餘的一層;若未來工具需跨客戶端共用,ADK 的 `McpToolset` 可無縫接上 |
-| **Vertex AI + ADC 而非 AI Studio API key** | IAM 身分認證、全系統零金鑰;計費併入 GCP 專案;本機以開發者身分、雲端以服務帳戶身分,同一份程式碼自動切換 |
-| **每次增量全量重渲染 Markdown** | markdown-it 渲染幾 KB 是微秒級;半截語法會隨字元到齊漸進成形。先選最笨但正確的方案,量測到瓶頸再優化 |
+| 決策                                        | 理由                                                                                                                            |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Google ADK**                              | Agent 推理迴圈、function calling、Session 管理開箱即用;`adk web` 開發介面適合驗證 Agent 行為;部署路徑直通 Cloud Run / Vertex AI |
+| **SSE 而非 WebSocket**                      | LLM 聊天是「一次 POST、單向逐字回」——單向就夠。SSE 走標準 HTTP、基建友善;WebSocket 留給真正雙向的場景(如語音)                   |
+| **自訂 /chat 端點而非 ADK 內建 api_server** | 內建端點格式是框架內部視角,欄位龐雜且隨版本變動;服務層翻譯成自己的協定,前後端契約由自己控制                                     |
+| **工具用 in-process function 而非 MCP**     | 工具只有單一消費者(本 Agent),MCP 是多餘的一層;若未來工具需跨客戶端共用,ADK 的 `McpToolset` 可無縫接上                           |
+| **Vertex AI + ADC 而非 AI Studio API key**  | IAM 身分認證、全系統零金鑰;計費併入 GCP 專案;本機以開發者身分、雲端以服務帳戶身分,同一份程式碼自動切換                          |
+| **每次增量全量重渲染 Markdown**             | markdown-it 渲染幾 KB 是微秒級;半截語法會隨字元到齊漸進成形。先選最笨但正確的方案,量測到瓶頸再優化                              |
 
 ## 本機開發
 
