@@ -1,0 +1,78 @@
+<script setup lang="ts">
+import { nextTick, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useTraceStore } from '@/stores/trace'
+import type { TraceStep } from '@/types/chat'
+
+const { steps } = storeToRefs(useTraceStore())
+const scrollEl = ref<HTMLElement | null>(null)
+
+// 步驟增加時跟著捲到底,跟聊天視窗同一招
+watch(
+  steps,
+  async () => {
+    await nextTick()
+    scrollEl.value?.scrollTo({ top: scrollEl.value.scrollHeight })
+  },
+  { deep: true },
+)
+
+const stepMeta: Record<TraceStep['type'], { icon: string; label: string }> = {
+  thinking: { icon: '🧠', label: '思考' },
+  tool_call: { icon: '🔧', label: '呼叫工具' },
+  tool_result: { icon: '📄', label: '工具結果' },
+  answering: { icon: '✍️', label: '生成回答' },
+}
+</script>
+
+<template>
+  <aside class="flex w-80 shrink-0 flex-col border-l border-line bg-surface-panel">
+    <div class="border-b border-line px-5 py-4">
+      <h2 class="text-sm font-semibold text-slate-200">Agent 過程</h2>
+      <p class="mt-0.5 text-xs text-slate-500">即時顯示推理與工具呼叫</p>
+    </div>
+
+    <div ref="scrollEl" class="chat-scroll flex-1 overflow-y-auto px-5 py-4">
+      <!-- 還沒提問過的空狀態 -->
+      <div v-if="steps.length === 0" class="mt-10 text-center text-xs leading-relaxed text-slate-600">
+        送出問題後,這裡會即時顯示<br />Agent 的推理步驟與工具呼叫
+      </div>
+
+      <ol
+        v-else
+        class="relative flex flex-col gap-4 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-px before:bg-line"
+      >
+        <li v-for="step in steps" :key="step.id" class="relative flex gap-3 pl-0">
+          <div
+            class="z-1 h-6 w-6 shrink-0 rounded-full bg-surface-raised text-xs flex items-center justify-center"
+            :class="step.status === 'running' ? 'animate-pulse ring-1 ring-accent' : ''"
+          >
+            {{ stepMeta[step.type].icon }}
+          </div>
+          <div class="min-w-0">
+            <div class="text-xs font-medium text-slate-300">
+              {{ stepMeta[step.type].label }}
+              <span
+                v-if="step.tool"
+                class="ml-1 rounded bg-accent/15 px-1.5 py-0.5 font-mono text-[11px] text-accent-soft"
+              >
+                {{ step.tool }}
+              </span>
+            </div>
+            <div
+              v-if="step.detail"
+              class="mt-1 break-all text-xs leading-relaxed text-slate-500"
+              :class="step.type === 'tool_call' ? 'font-mono' : ''"
+            >
+              {{ step.detail }}
+            </div>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="border-t border-line px-5 py-3 text-[11px] text-slate-600">
+      Powered by Google ADK · Gemini
+    </div>
+  </aside>
+</template>

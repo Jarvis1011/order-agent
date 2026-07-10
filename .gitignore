@@ -1,0 +1,19 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# 金鑰與本機狀態
+.env
+my_agent/.env
+my_agent/.adk/
+
+# 資料庫(seed 可隨時重建)
+db/orders.db
+
+# 前端
+frontend/node_modules/
+frontend/dist/
+
+# 雜項
+.DS_Store

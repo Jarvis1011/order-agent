@@ -1,0 +1,131 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  font-family:
+    'Inter',
+    'Noto Sans TC',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    'Microsoft JhengHei',
+    sans-serif;
+  background: #0f1117;
+  color: #e2e8f0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 串流中訊息尾端的閃爍游標 */
+.streaming-cursor::after {
+  content: '▍';
+  margin-left: 2px;
+  color: #818cf8;
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* AI 回覆的 Markdown 內容樣式(深色調) */
+.md-body > * + * {
+  margin-top: 0.6em;
+}
+
+.md-body h1,
+.md-body h2,
+.md-body h3 {
+  font-size: 1em;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.md-body ul,
+.md-body ol {
+  padding-left: 1.4em;
+}
+
+.md-body li + li {
+  margin-top: 0.25em;
+}
+
+.md-body a {
+  color: #818cf8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.md-body code {
+  background: #0f1117;
+  border: 1px solid #2a3040;
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-size: 0.9em;
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+}
+
+.md-body pre {
+  background: #0f1117;
+  border: 1px solid #2a3040;
+  border-radius: 8px;
+  padding: 0.8em 1em;
+  overflow-x: auto;
+}
+
+.md-body pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.md-body table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.95em;
+}
+
+.md-body th,
+.md-body td {
+  border: 1px solid #2a3040;
+  padding: 0.4em 0.7em;
+  text-align: left;
+}
+
+.md-body th {
+  background: #1e2330;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.md-body tr:nth-child(even) td {
+  background: rgba(30, 35, 48, 0.5);
+}
+
+.md-body blockquote {
+  border-left: 3px solid #6366f1;
+  padding-left: 0.8em;
+  color: #94a3b8;
+}
+
+/* 聊天區捲軸 */
+.chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: #2a3040;
+  border-radius: 3px;
+}
