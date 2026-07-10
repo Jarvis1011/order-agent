@@ -19,7 +19,7 @@ watch(
 </script>
 
 <template>
-  <div ref="scrollEl" class="chat-scroll flex-1 overflow-y-auto px-6 py-6">
+  <div ref="scrollEl" class="chat-scroll flex-1 overflow-y-auto px-3 py-4 md:px-6 md:py-6">
     <div class="mx-auto flex max-w-3xl flex-col gap-5">
       <MessageBubble v-for="m in messages" :key="m.id" :message="m" />
     </div>

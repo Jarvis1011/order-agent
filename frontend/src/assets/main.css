@@ -12,6 +12,15 @@ body,
   height: 100%;
 }
 
+/* 手機瀏覽器的網址列會吃掉 100vh,dvh 是「實際可視高度」 */
+@supports (height: 100dvh) {
+  html,
+  body,
+  #app {
+    height: 100dvh;
+  }
+}
+
 body {
   font-family:
     'Inter',

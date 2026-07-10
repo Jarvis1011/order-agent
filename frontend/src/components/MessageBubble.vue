@@ -23,7 +23,7 @@ const html = computed(() =>
 
     <!-- 泡泡 -->
     <div
-      class="max-w-[72%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed break-words"
+      class="max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed break-words md:max-w-[72%]"
       :class="[
         message.role === 'user'
           ? 'bg-accent text-white rounded-tr-sm whitespace-pre-wrap'

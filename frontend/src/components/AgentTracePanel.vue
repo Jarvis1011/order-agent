@@ -4,6 +4,10 @@ import { storeToRefs } from 'pinia'
 import { useTraceStore } from '@/stores/trace'
 import type { TraceStep } from '@/types/chat'
 
+// 手機:抽屜模式,由父層控制開關;桌機(md+):固定側欄,open 無作用
+defineProps<{ open: boolean }>()
+defineEmits<{ close: [] }>()
+
 const { steps } = storeToRefs(useTraceStore())
 const scrollEl = ref<HTMLElement | null>(null)
 
@@ -26,10 +30,24 @@ const stepMeta: Record<TraceStep['type'], { icon: string; label: string }> = {
 </script>
 
 <template>
-  <aside class="flex w-80 shrink-0 flex-col border-l border-line bg-surface-panel">
-    <div class="border-b border-line px-5 py-4">
-      <h2 class="text-sm font-semibold text-slate-200">Agent 過程</h2>
-      <p class="mt-0.5 text-xs text-slate-500">即時顯示推理與工具呼叫</p>
+  <!-- 手機:固定定位的右側抽屜(translate 滑入滑出);md+:回歸靜態側欄 -->
+  <aside
+    class="fixed inset-y-0 right-0 z-50 flex w-[85vw] max-w-90 flex-col border-l border-line bg-surface-panel transition-transform duration-200 md:static md:z-auto md:w-80 md:shrink-0 md:translate-x-0 md:transition-none"
+    :class="open ? 'translate-x-0' : 'translate-x-full'"
+  >
+    <div class="flex items-start justify-between border-b border-line px-5 py-4">
+      <div>
+        <h2 class="text-sm font-semibold text-slate-200">Agent 過程</h2>
+        <p class="mt-0.5 text-xs text-slate-500">即時顯示推理與工具呼叫</p>
+      </div>
+      <!-- 手機:關閉抽屜 -->
+      <button
+        class="h-8 w-8 rounded-lg text-slate-400 hover:bg-surface-raised md:hidden"
+        aria-label="關閉"
+        @click="$emit('close')"
+      >
+        ✕
+      </button>
     </div>
 
     <div ref="scrollEl" class="chat-scroll flex-1 overflow-y-auto px-5 py-4">

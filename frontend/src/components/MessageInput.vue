@@ -23,7 +23,7 @@ function onKeydown(e: KeyboardEvent) {
 </script>
 
 <template>
-  <div class="border-t border-line bg-surface-panel px-6 py-4">
+  <div class="border-t border-line bg-surface-panel px-3 py-3 md:px-6 md:py-4">
     <div class="mx-auto flex max-w-3xl items-end gap-3">
       <textarea
         v-model="draft"
