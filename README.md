@@ -27,7 +27,7 @@ flowchart LR
         ADK["Google ADK Runner<br/>order_agent(Gemini)"]
         DB[("SQLite<br/>訂單資料庫")]
     end
-    VERTEX["Vertex AI<br/>gemini-3.5-flash"]
+    VERTEX["Vertex AI<br/>gemini-2.5-flash"]
 
     UI -- "POST /api/chat" --> API
     API -- "SSE 事件流" --> UI
@@ -51,17 +51,6 @@ flowchart LR
 | `done`        | 本輪結束       | 收尾                           |
 | `error`       | 錯誤           | 錯誤狀態 UI(不會無聲斷線)      |
 
-## 技術選型與理由
-
-| 決策                                        | 理由                                                                                                                            |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **Google ADK**                              | Agent 推理迴圈、function calling、Session 管理開箱即用;`adk web` 開發介面適合驗證 Agent 行為;部署路徑直通 Cloud Run / Vertex AI |
-| **SSE 而非 WebSocket**                      | LLM 聊天是「一次 POST、單向逐字回」——單向就夠。SSE 走標準 HTTP、基建友善;WebSocket 留給真正雙向的場景(如語音)                   |
-| **自訂 /chat 端點而非 ADK 內建 api_server** | 內建端點格式是框架內部視角,欄位龐雜且隨版本變動;服務層翻譯成自己的協定,前後端契約由自己控制                                     |
-| **工具用 in-process function 而非 MCP**     | 工具只有單一消費者(本 Agent),MCP 是多餘的一層;若未來工具需跨客戶端共用,ADK 的 `McpToolset` 可無縫接上                           |
-| **Vertex AI + ADC 而非 AI Studio API key**  | IAM 身分認證、全系統零金鑰;計費併入 GCP 專案;本機以開發者身分、雲端以服務帳戶身分,同一份程式碼自動切換                          |
-| **每次增量全量重渲染 Markdown**             | markdown-it 渲染幾 KB 是微秒級;半截語法會隨字元到齊漸進成形。先選最笨但正確的方案,量測到瓶頸再優化                              |
-
 ## 本機開發
 
 需求:Python 3.11+、Node.js 22+、gcloud CLI(已 `gcloud auth application-default login`)
@@ -80,9 +69,6 @@ uvicorn server.main:app --port 8000
 cd frontend
 npm install
 npm run dev               # http://localhost:5173(/api 由 Vite proxy 轉發到 8000)
-
-# 測試
-pytest                    # 工具層單元測試(測性質,不測魔法數字)
 ```
 
 ## Docker
@@ -117,9 +103,3 @@ order-agent/
 ├── Dockerfile         # 多階段建置
 └── docker-compose.yml
 ```
-
-## 已知限制(demo 取捨)
-
-- **SQLite 在容器內**:實例重啟即重置回 seed 資料——demo 永遠乾淨;生產應外接 Cloud SQL,容器保持無狀態
-- **InMemory Session**:多實例間不共享對話記憶;生產應換 DB-backed session service
-- **單一使用者**:`user_id` 寫死;生產由登入身分帶入
