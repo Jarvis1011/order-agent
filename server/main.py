@@ -80,18 +80,22 @@ async def chat(req: ChatRequest):
             ):
                 parts = event.content.parts if event.content and event.content.parts else []
                 for part in parts:
+                    # 同一個 function_call 會在 partial 與彙總事件各出現一次,
+                    # 只取彙總(非 partial),否則前端側欄會畫出重複步驟
                     if part.function_call:
-                        yield sse({
-                            "type": "tool_call",
-                            "tool": part.function_call.name,
-                            "args": part.function_call.args,
-                        })
+                        if not event.partial:
+                            yield sse({
+                                "type": "tool_call",
+                                "tool": part.function_call.name,
+                                "args": part.function_call.args,
+                            })
                     elif part.function_response:
-                        yield sse({
-                            "type": "tool_result",
-                            "tool": part.function_response.name,
-                            "response": part.function_response.response,
-                        })
+                        if not event.partial:
+                            yield sse({
+                                "type": "tool_result",
+                                "tool": part.function_response.name,
+                                "response": part.function_response.response,
+                            })
                     elif part.text:
                         yield sse({
                             "type": "delta" if event.partial else "text",
