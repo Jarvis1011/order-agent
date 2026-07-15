@@ -13,13 +13,21 @@ def _connect() -> sqlite3.Connection:
     return db
 
 
-def query_orders(status: str = "", customer_name: str = "") -> list[dict]:
-    """查詢訂單列表。可依訂單狀態或客戶名稱(模糊比對)過濾,兩者皆可留空。
+def query_orders(
+    status: str = "",
+    customer_name: str = "",
+    order_date_from: str = "",
+    order_date_to: str = "",
+) -> list[dict]:
+    """查詢訂單列表。可依訂單狀態、客戶名稱(模糊比對)、下單日期區間過濾,
+    所有條件皆可留空、可自由組合。
 
     Args:
         status: 訂單狀態,可為 pending(待處理)、shipped(已出貨)、
             delayed(延誤)、done(已完成),留空表示不過濾狀態。
         customer_name: 客戶名稱關鍵字,留空表示不過濾客戶。
+        order_date_from: 下單日期起(含),格式 YYYY-MM-DD,留空表示不限。
+        order_date_to: 下單日期迄(含),格式 YYYY-MM-DD,留空表示不限。
 
     Returns:
         訂單列表(最多 50 筆),每筆含 id、客戶名、城市、狀態、金額、下單日、應出貨日。
@@ -38,6 +46,12 @@ def query_orders(status: str = "", customer_name: str = "") -> list[dict]:
     if customer_name:
         sql += " AND c.name LIKE ?"
         params.append(f"%{customer_name}%")
+    if order_date_from:
+        sql += " AND o.order_date >= ?"
+        params.append(order_date_from)
+    if order_date_to:
+        sql += " AND o.order_date <= ?"
+        params.append(order_date_to)
     sql += " ORDER BY o.due_date DESC LIMIT 50"
 
     db = _connect()
@@ -98,52 +112,6 @@ def flag_delayed_orders() -> dict:
     db.commit()
     db.close()
     return {"flagged_count": len(ids), "order_ids": ids}
-
-def query_orders(
-    status: str = "",
-    customer_name: str = "",
-    order_date_from: str = "",
-    order_date_to: str = "",
-) -> list[dict]:
-    """查詢訂單列表。可依訂單狀態、客戶名稱(模糊比對)、下單日期區間過濾,
-    所有條件皆可留空、可自由組合。
-
-    Args:
-        status: 訂單狀態,可為 pending(待處理)、shipped(已出貨)、
-            delayed(延誤)、done(已完成),留空表示不過濾狀態。
-        customer_name: 客戶名稱關鍵字,留空表示不過濾客戶。
-        order_date_from: 下單日期起(含),格式 YYYY-MM-DD,留空表示不限。
-        order_date_to: 下單日期迄(含),格式 YYYY-MM-DD,留空表示不限。
-
-    Returns:
-        訂單列表(最多 50 筆),每筆含 id、客戶名、城市、狀態、金額、下單日、應出貨日。
-    """
-    sql = """
-        SELECT o.id, c.name AS customer, c.city, o.status, o.amount,
-               o.order_date, o.due_date
-        FROM orders o
-        JOIN customers c ON c.id = o.customer_id
-        WHERE 1 = 1
-    """
-    params: list = []
-    if status:
-        sql += " AND o.status = ?"
-        params.append(status)
-    if customer_name:
-        sql += " AND c.name LIKE ?"
-        params.append(f"%{customer_name}%")
-    if order_date_from:
-        sql += " AND o.order_date >= ?"
-        params.append(order_date_from)
-    if order_date_to:
-        sql += " AND o.order_date <= ?"
-        params.append(order_date_to)
-    sql += " ORDER BY o.due_date DESC LIMIT 50"
-
-    db = _connect()
-    rows = [dict(r) for r in db.execute(sql, params)]
-    db.close()
-    return rows
 
 
 if __name__ == "__main__":
