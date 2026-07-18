@@ -1,0 +1,7 @@
+{
+  // 檔案總管隱藏 Python 快取(純視覺,不影響 git 與執行)
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true
+  }
+}
