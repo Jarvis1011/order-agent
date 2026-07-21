@@ -71,6 +71,9 @@ export const useTraceStore = defineStore('trace', () => {
 
   /** 這輪結束(成功或失敗都要收尾) */
   function end() {
+    for (const s of steps.value) {
+      if (s.type === 'answering') s.detail = '回答完成'
+    }
     finishRunning()
   }
 
